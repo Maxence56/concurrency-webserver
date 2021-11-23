@@ -7,21 +7,33 @@ char default_root[] = ".";
 //
 // ./wserver [-d <basedir>] [-p <portnum>] 
 // 
+
+
 int main(int argc, char *argv[]) {
     int c;
     char *root_dir = default_root;
     int port = 10000;
+	int threads = 1;
+	int buffer = 1;
     
-    while ((c = getopt(argc, argv, "d:p:")) != -1)
+    while ((c = getopt(argc, argv, "d:p:t:b")) != -1)
 	switch (c) {
 	case 'd':
 	    root_dir = optarg;
 	    break;
 	case 'p':
 	    port = atoi(optarg);
+		//atoi converts string to int
 	    break;
+	case 't':
+		threads = atoi(optarg);
+	    break;
+	case 'b':
+		buffer = atoi(optarg);
+	    break;
+
 	default:
-	    fprintf(stderr, "usage: wserver [-d basedir] [-p port]\n");
+	    fprintf(stderr, "usage: wserver [-d basedir] [-p port] [-t threads] [-b buffers]\n");
 	    exit(1);
 	}
 
