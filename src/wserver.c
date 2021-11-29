@@ -3,6 +3,12 @@
 #include "request.h"
 #include "io_helper.h"
 
+//
+// ./wserver [-d <basedir>] [-p <portnum>] [-t threads] [-b buffersize]
+// 
+
+
+
 char default_root[] = ".";
 int *buffer;
 int count = 0;
@@ -12,9 +18,7 @@ int buffersize = 1;
 cond_t empty, fill;
 mutex_t mutex;
 
-//
-// ./wserver [-d <basedir>] [-p <portnum>] [-t threads] [-b buffersize]
-// 
+
 
 void put_in_buffer(int value) {
 	buffer[fill_ptr] = value;
@@ -54,7 +58,7 @@ int main(int argc, char *argv[]) {
     int port = 10000;
 	int threads = 1;
 	
-    
+   
     while ((c = getopt(argc, argv, "d:p:t:b")) != -1)
 	switch (c) {
 	case 'd':
@@ -98,6 +102,7 @@ int main(int argc, char *argv[]) {
 		struct sockaddr_in client_addr;
 		int client_len = sizeof(client_addr);
 		int conn_fd = accept_or_die(listen_fd, (sockaddr_t *) &client_addr, (socklen_t *) &client_len);
+		put_in_buffer(conn_fd);
 		Pthread_cond_signal(&fill);
 		Pthread_mutex_unlock(&mutex);
 	
