@@ -15,8 +15,9 @@ int count = 0;
 int use_ptr = 0;
 int fill_ptr = 0;
 int buffersize = 1;
-cond_t empty, fill;
-mutex_t mutex;
+pthread_cond_t empty = PTHREAD_COND_INITIALIZER;
+pthread_cond_t fill = PTHREAD_COND_INITIALIZER;
+pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
 
 
@@ -35,16 +36,16 @@ int get_from_buffer() {
 
 void *connection_handler() {
 	while(1) {
-		Pthread_mutex_lock(&mutex);
+		pthread_mutex_lock(&mutex);
 		while (count == 0) {
-			Pthread_cond_wait(&fill, &mutex);
+			pthread_cond_wait(&fill, &mutex);
 		}
     	
     	int conn_fd = get_from_buffer();
 		request_handle(conn_fd);
 		close_or_die(conn_fd);
-		Pthread_cond_signal(&empty);
-		Pthread_mutex_unlock(&mutex);
+		pthread_cond_signal(&empty);
+		pthread_mutex_unlock(&mutex);
 
 	}
 	
@@ -95,16 +96,16 @@ int main(int argc, char *argv[]) {
     
 	
 	while (1) {
-		Pthread_mutex_lock(&mutex); 
+		pthread_mutex_lock(&mutex); 
 		while (count == buffersize) {
-			Pthread_cond_wait(&empty, &mutex);
+			pthread_cond_wait(&empty, &mutex);
 		}
 		struct sockaddr_in client_addr;
 		int client_len = sizeof(client_addr);
 		int conn_fd = accept_or_die(listen_fd, (sockaddr_t *) &client_addr, (socklen_t *) &client_len);
 		put_in_buffer(conn_fd);
-		Pthread_cond_signal(&fill);
-		Pthread_mutex_unlock(&mutex);
+		pthread_cond_signal(&fill);
+		pthread_mutex_unlock(&mutex);
 	
     }
     return 0;
