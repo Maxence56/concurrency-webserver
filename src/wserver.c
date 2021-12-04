@@ -33,6 +33,7 @@ int get_from_buffer() {
 }
 
 void *connection_handler() {
+	puts("Running thread");
 	while(1) {
 		pthread_mutex_lock(&mutex);
 		while (count == 0) {
@@ -44,7 +45,6 @@ void *connection_handler() {
 		close_or_die(conn_fd);
 		pthread_cond_signal(&empty);
 		pthread_mutex_unlock(&mutex);
-
 	}
 	
 }
@@ -83,26 +83,29 @@ int main(int argc, char *argv[]) {
     chdir_or_die(root_dir);
 
 	buffer = (int*) malloc(sizeof(int)*buffersize);
-	pthread_t thr;
+	//pthread_t thr;
+	pthread_t thrs[threads];
 	for(int i=0;i<threads;i++) {
-    pthread_create( &thr, NULL , connection_handler , NULL);
-    }
+    pthread_create( &thrs[i], NULL , connection_handler , 1);
+	}
 
     // now, get to work 
     int listen_fd = open_listen_fd_or_die(port);
     
 	while (1) {
-		pthread_mutex_lock(&mutex); 
-		while (count == buffersize) {
-			pthread_cond_wait(&empty, &mutex);
-		}
 		struct sockaddr_in client_addr;
 		int client_len = sizeof(client_addr);
 		int conn_fd = accept_or_die(listen_fd, (sockaddr_t *) &client_addr, (socklen_t *) &client_len);
+		
+		pthread_mutex_lock(&mutex); 
+		int waiting = 0;
+		while (count == buffersize ) {
+			waiting++;
+			pthread_cond_wait(&empty, &mutex);
+		}
 		put_in_buffer(conn_fd);
 		pthread_cond_signal(&fill);
 		pthread_mutex_unlock(&mutex);
-	
     }
     return 0;
 }
