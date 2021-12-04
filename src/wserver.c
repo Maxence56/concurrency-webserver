@@ -7,10 +7,8 @@
 // ./wserver [-d <basedir>] [-p <portnum>] [-t threads] [-b buffersize]
 // 
 
-
-
 char default_root[] = ".";
-int *buffer;
+int *buffer = NULL;
 int count = 0;
 int use_ptr = 0;
 int fill_ptr = 0;
@@ -60,7 +58,7 @@ int main(int argc, char *argv[]) {
 	int threads = 1;
 	
    
-    while ((c = getopt(argc, argv, "d:p:t:b")) != -1)
+    while ((c = getopt(argc, argv, "d:p:t:b:")) != -1)
 	switch (c) {
 	case 'd':
 	    root_dir = optarg;
@@ -84,17 +82,15 @@ int main(int argc, char *argv[]) {
     // run out of this directory
     chdir_or_die(root_dir);
 
-	int buffer = (int*) malloc(sizeof(int)*buffersize);
+	buffer = (int*) malloc(sizeof(int)*buffersize);
 	pthread_t thr;
 	for(int i=0;i<threads;i++) {
     pthread_create( &thr, NULL , connection_handler , NULL);
     }
 
-
     // now, get to work 
     int listen_fd = open_listen_fd_or_die(port);
     
-	
 	while (1) {
 		pthread_mutex_lock(&mutex); 
 		while (count == buffersize) {
