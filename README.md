@@ -278,10 +278,16 @@ For example, you could run your program as:
 ```
 prompt> server -d . -p 8003 -t 8 -b 16
 ```
-
 In this case, your web server will listen to port 8003, create 8 worker threads for
 handling HTTP requests, and allocate 16 buffers for connections that are currently
 in progress (or waiting).
+
+To test your implementation you can run multiple client requests simultaneously (xargs -P).  For example, you could run your program as:
+
+```
+prompt> seq <n_requests> | xargs  -n 1 -P <n_processes> -I{}  ./wclient localhost 10001 /index.html
+```
+ 
 
 # Source Code Overview
 

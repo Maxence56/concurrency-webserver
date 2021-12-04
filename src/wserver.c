@@ -100,6 +100,7 @@ int main(int argc, char *argv[]) {
 		pthread_mutex_lock(&mutex); 
 		int waiting = 0;
 		while (count == buffersize ) {
+			printf(" Max count %d\n", count);
 			waiting++;
 			pthread_cond_wait(&empty, &mutex);
 		}
