@@ -23,8 +23,7 @@ void put_in_buffer(int value) {
 	buffer[fill_ptr] = value;
 	fill_ptr = (fill_ptr + 1) %buffersize;
 	count++;
-}
-
+}cd 
 int get_from_buffer() {
 	int tmp = buffer[use_ptr];
 	use_ptr = (use_ptr + 1) % buffersize;
@@ -41,10 +40,10 @@ void *connection_handler() {
 		}
     	
     	int conn_fd = get_from_buffer();
-		request_handle(conn_fd);
-		close_or_die(conn_fd);
 		pthread_cond_signal(&empty);
 		pthread_mutex_unlock(&mutex);
+		request_handle(conn_fd);
+		close_or_die(conn_fd);
 	}
 	
 }
