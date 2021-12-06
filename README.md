@@ -287,7 +287,10 @@ To test your implementation you can run multiple client requests simultaneously 
 ```
 prompt> seq <n_requests> | xargs  -n 1 -P <n_processes> -I{}  ./wclient localhost 10001 /index.html
 ```
- 
+e.g:
+``` 
+seq 10 | xargs  -n 1 -P 10  -I{}  ./wclient localhost 10000 /spin.cgi?10
+```
 
 # Source Code Overview
 
