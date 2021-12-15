@@ -23,7 +23,7 @@ void put_in_buffer(int value) {
 	buffer[fill_ptr] = value;
 	fill_ptr = (fill_ptr + 1) %buffersize;
 	count++;
-}cd 
+} 
 int get_from_buffer() {
 	int tmp = buffer[use_ptr];
 	use_ptr = (use_ptr + 1) % buffersize;
@@ -97,10 +97,9 @@ int main(int argc, char *argv[]) {
 		int conn_fd = accept_or_die(listen_fd, (sockaddr_t *) &client_addr, (socklen_t *) &client_len);
 		
 		pthread_mutex_lock(&mutex); 
-		int waiting = 0;
+		
 		while (count == buffersize ) {
-			printf(" Max count %d\n", count);
-			waiting++;
+			
 			pthread_cond_wait(&empty, &mutex);
 		}
 		put_in_buffer(conn_fd);
