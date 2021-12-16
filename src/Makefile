@@ -1,6 +1,7 @@
 # An admittedly primitive Makefile
 # To compile, type "make" or make "all"
 # To remove files, type "make clean"
+# We added -lpthread to link the pthread library  
 
 CC = gcc
 CFLAGS = -Wall 

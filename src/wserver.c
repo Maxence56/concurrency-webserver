@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include <pthread.h>
+#include <pthread.h> // we import the pthread library
 #include "request.h"
 #include "io_helper.h"
 
@@ -8,28 +8,31 @@
 // 
 
 char default_root[] = ".";
-int *buffer = NULL;
-int count = 0;
+int *buffer = NULL;   
+int count = 0;   // count indicate the number of requests waiting in queue
 int use_ptr = 0;
 int fill_ptr = 0;
-int buffersize = 1;
-pthread_cond_t empty = PTHREAD_COND_INITIALIZER;
+int buffersize = 1;   // default value of buffersize is 1
+pthread_cond_t empty = PTHREAD_COND_INITIALIZER;      // pthread condition variables and mutex
 pthread_cond_t fill = PTHREAD_COND_INITIALIZER;
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
-
+// functions for queue operations
 
 void put_in_buffer(int value) {
 	buffer[fill_ptr] = value;
 	fill_ptr = (fill_ptr + 1) %buffersize;
 	count++;
-}
+} 
 int get_from_buffer() {
 	int tmp = buffer[use_ptr];
 	use_ptr = (use_ptr + 1) % buffersize;
 	count--;
 	return tmp;
 }
+
+
+// the consummer function
 
 void *connection_handler() {
 	puts("Running thread");
@@ -56,7 +59,8 @@ int main(int argc, char *argv[]) {
     int port = 10000;
 	int threads = 1;
 	
-   
+   // the parsing of the provided arguments
+
     while ((c = getopt(argc, argv, "d:p:t:b:")) != -1)
 	switch (c) {
 	case 'd':
@@ -64,7 +68,7 @@ int main(int argc, char *argv[]) {
 	    break;
 	case 'p':
 	    port = atoi(optarg);
-		//atoi converts string to int
+		
 	    break;
 	case 't':
 		threads = atoi(optarg);
@@ -80,27 +84,28 @@ int main(int argc, char *argv[]) {
 
     // run out of this directory
     chdir_or_die(root_dir);
-
+    // memory allocation for the buffer 
 	buffer = (int*) malloc(sizeof(int)*buffersize);
-	//pthread_t thr;
+	// we create the threads
 	pthread_t thrs[threads];
 	for(int i=0;i<threads;i++) {
     pthread_create( &thrs[i], NULL , connection_handler , 1);
 	}
 
-    // now, get to work 
+    // file descriptor to listen on the port
     int listen_fd = open_listen_fd_or_die(port);
     
+
+	// the producer threads
 	while (1) {
 		struct sockaddr_in client_addr;
 		int client_len = sizeof(client_addr);
 		int conn_fd = accept_or_die(listen_fd, (sockaddr_t *) &client_addr, (socklen_t *) &client_len);
 		
 		pthread_mutex_lock(&mutex); 
-		int waiting = 0;
+		
 		while (count == buffersize ) {
-			printf(" Max count %d\n", count);
-			waiting++;
+			
 			pthread_cond_wait(&empty, &mutex);
 		}
 		put_in_buffer(conn_fd);
@@ -109,18 +114,3 @@ int main(int argc, char *argv[]) {
     }
     return 0;
 }
-
-
-    
-
-/*
-Your master thread is then responsible for accepting new HTTP connections over the
- network and placing the descriptor for this connection into a fixed-size buffer;
-  in your basic implementation, the master thread should not read from this connection.
-   The number of elements in the buffer is also specified on the command line.
-    Note that the existing web server has a single thread that accepts a connection 
-	and then immediately handles the connection; in your web server, this thread should
-	 place the connection descriptor into a fixed-size buffer and return to accepting
-	  more connections. 
-*/
- 
