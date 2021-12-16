@@ -23,7 +23,7 @@ void put_in_buffer(int value) {
 	buffer[fill_ptr] = value;
 	fill_ptr = (fill_ptr + 1) %buffersize;
 	count++;
-}cd 
+}
 int get_from_buffer() {
 	int tmp = buffer[use_ptr];
 	use_ptr = (use_ptr + 1) % buffersize;
