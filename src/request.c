@@ -56,6 +56,11 @@ void request_read_headers(int fd) {
 //
 int request_parse_uri(char *uri, char *filename, char *cgiargs) {
     char *ptr;
+
+    if (strstr(uri, "..")) { 
+        puts ("Path traversal error! ");
+        return 0;
+        }
     
     if (!strstr(uri, "cgi")) { 
 	// static
